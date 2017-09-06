@@ -407,7 +407,9 @@ def tuneLogisticRegression():
     return clf_A1
 
 def evaluateLogisticRegressionModel():
-    clf_A1 = tuneLogisticRegression()
+
+    # clf_A1 = tuneLogisticRegression()
+
     # Model evaluation visualizations
     # Confusion matrix
     showConfusionMatrix(clf_A1, X_test, y_test)
@@ -431,7 +433,9 @@ def tuneSVC():
     return clf_B1
 
 def evaluateSVCModel():
-    clf_B1 = tuneSVC()
+
+    # clf_B1 = tuneSVC()
+
     # Model evaluation visualizations
     # Confusion matrix
     showConfusionMatrix(clf_B1, X_test, y_test)
@@ -453,7 +457,9 @@ def tuneKNN():
     return clf_C1
 
 def evaluateKNNModel():
-    clf_C1 = tuneKNN()
+
+    # clf_C1 = tuneKNN()
+
     # Model evaluation visualizations
     # Confusion matrix
     showConfusionMatrix(clf_C1, X_test, y_test)
@@ -469,7 +475,7 @@ def tuneAdaBoost():
     # Maybe get rid of 50? too good to be true???
     param_grids = {"n_estimators": [1, 2, 3, 4, 5, 10, 50]}
     clf_D1 = GridSearchCV(clf_D, param_grid=param_grids, cv=10, n_jobs=-1)
-
+    clf_D1.fit(X_train, y_train)
     print (clf_D1.best_params_)
     print (clf_D1.best_score_)
     train_predict(clf_D1, X_train, y_train, X_test, y_test)
@@ -488,7 +494,8 @@ def evaluateAdaBoostModel():
     # # run grid search
     # clf_D1 = GridSearchCV(ABC, param_grid=param_grid, scoring='roc_auc')
 
-    clf_D1 = tuneAdaBoost()
+    # clf_D1 = tuneAdaBoost()
+
     # Model evaluation visualizations
     # Confusion matrix
     showConfusionMatrix(clf_D1, X_test, y_test)
@@ -573,6 +580,10 @@ clf_B = SVC()
 clf_C = KNeighborsClassifier(n_neighbors=25,weights='uniform')
 clf_D = AdaBoostClassifier(n_estimators=3)
 
+clf_A1 = tuneLogisticRegression()
+clf_B1 = tuneSVC()
+clf_C1 = tuneKNN()
+clf_D1 = tuneAdaBoost()
 
 # X_train_400 = X_train[:400]
 # y_train_400 = y_train[:400]
@@ -593,7 +604,7 @@ print "======================================="
 
 print "We will now evaluate the tuned models..."
 
-evaluateLogisticRegressionModel()
+evaluateAdaBoostModel()
 
 
 # # Show SVC boundary comparison
@@ -609,10 +620,8 @@ evaluateLogisticRegressionModel()
 # plt.show()
 
 
-
-
 #================ TRAINING ON ENTIRE SET============================
 # from sklearn.model_selection import cross_val_score
 # print clf_A1.score(X_test, y_test)
 # print cross_val_score(clf_A1, X_all, y_all)
-# clf_A1.fit(X_all,y_all)
+# clf_A1.fit(data1,data.results)
