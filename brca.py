@@ -156,43 +156,38 @@ def removeOutliers(data):
     data.drop(data.index[common_outlier_rows]).reset_index(drop=True)
     return data
 
-# data_cleaned = data.drop(data.index[common_outlier_rows]).reset_index(drop = True)
+# Uses data1 as data... data1 is data without the results column
+def showPCA(data):
+    # PCA to find which data dimmensions maximize the variance of features
+    pca = PCA()
+    pca_results = pca.fit(data)
+    # data from first row to last row of column 0
+    print("PCA components:\n{}".format(pca.components_[:, 0]))
+    type(pca.components_[:, 0])
+    print("PCA explained variance ratio:\n{}".format(pca.explained_variance_ratio_[:4] * 100))
 
-# data1 = data_cleaned1
-# data = data_cleaned
-# # PCA to find which data dimmensions maximize the variance of features
-# pca = PCA()
-# pca_results = pca.fit(data1)
-# # data from first row to last row of column 0
-# print("PCA components:\n{}".format(pca.components_[:,0]))
-# type(pca.components_[:,0])
-# print("PCA explained variance ratio:\n{}".format(pca.explained_variance_ratio_[:4]*100))
+    # Try to understand this later:
+    plt.figure(figsize=(10, 8))
 
-# # Try to understand this later:
-# plt.figure(figsize=(10,8))
-#
-# # create an x-axis variable for each pca component
-# x = np.arange(1,5)
-#
-# # plot the cumulative variance
-# plt.plot(x, np.cumsum(pca.explained_variance_ratio_[0:4]), '-o', color='black')
-#
-# # plot the components' variance
-# plt.bar(x, pca.explained_variance_ratio_[0:4], align='center', alpha=0.5)
-#
-# # plot styling
-# plt.ylim(0, 1.05)
-# plt.annotate('Cumulative\nexplained\nvariance',
-#              xy=(3.7, .88), arrowprops=dict(arrowstyle='->'), xytext=(4.5, .6))
-# for i,j in zip(x, np.cumsum(pca.explained_variance_ratio_[0:4])):
-#     plt.annotate(str(j.round(2)),xy=(i+.2,j-.02))
-# plt.xticks(range(1,5))
-# plt.xlabel('PCA components')
-# plt.ylabel('Explained Variance')
-# plt.show()
+    # create an x-axis variable for each pca component
+    x = np.arange(1, 5)
 
+    # plot the cumulative variance
+    plt.plot(x, np.cumsum(pca.explained_variance_ratio_[0:4]), '-o', color='black')
 
+    # plot the components' variance
+    plt.bar(x, pca.explained_variance_ratio_[0:4], align='center', alpha=0.5)
 
+    # plot styling
+    plt.ylim(0, 1.05)
+    plt.annotate('Cumulative\nexplained\nvariance',
+                 xy=(3.7, .88), arrowprops=dict(arrowstyle='->'), xytext=(4.5, .6))
+    for i, j in zip(x, np.cumsum(pca.explained_variance_ratio_[0:4])):
+        plt.annotate(str(j.round(2)), xy=(i + .2, j - .02))
+    plt.xticks(range(1, 5))
+    plt.xlabel('PCA components')
+    plt.ylabel('Explained Variance')
+    plt.show()
 #=================PREDICTIVE MODELING=================
 
 #=================UNSUPERVISED========================
@@ -534,6 +529,8 @@ raw_data = getData("/Users/anthonybao/Desktop/datasets/brca/data.csv")
 
 data = removeOutliers(raw_data)
 
+# showStats1(data)
+
 # data['diagnosis'] = data['diagnosis'].map({'M':1, 'B':0})
 
 data1 = data.drop(data.columns[0], axis=1, inplace=False)
@@ -542,6 +539,8 @@ print data
 print data1
 
 print data.shape
+
+showPCA(data1)
 
 # feature_cols = list(data.columns[1:3])
 # target_col = data.columns[-0]
@@ -580,11 +579,6 @@ clf_B = SVC()
 clf_C = KNeighborsClassifier(n_neighbors=25,weights='uniform')
 clf_D = AdaBoostClassifier(n_estimators=3)
 
-clf_A1 = tuneLogisticRegression()
-clf_B1 = tuneSVC()
-clf_C1 = tuneKNN()
-clf_D1 = tuneAdaBoost()
-
 # X_train_400 = X_train[:400]
 # y_train_400 = y_train[:400]
 # Untuned
@@ -604,7 +598,12 @@ print "======================================="
 
 print "We will now evaluate the tuned models..."
 
-evaluateAdaBoostModel()
+clf_A1 = tuneLogisticRegression()
+clf_B1 = tuneSVC()
+clf_C1 = tuneKNN()
+clf_D1 = tuneAdaBoost()
+
+evaluateLogisticRegressionModel()
 
 
 # # Show SVC boundary comparison
