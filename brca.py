@@ -276,7 +276,86 @@ def train_predict(clf, X_train, y_train, X_test, y_test):
     print ("F1 score for training set: {:.4f}.".format(predict_labels(clf, X_train, y_train)))
     print ("F1 score for test set: {:.4f}.".format(predict_labels(clf, X_test, y_test)))
 
-#===================EVALUATE MODEL========================
+#===================MODEL COMPARISONS=====================
+# SVC
+def make_meshgrid(x, y, h=.02):
+    """Create a mesh of points to plot in
+
+    Parameters
+    ----------
+    x: data to base x-axis meshgrid on
+    y: data to base y-axis meshgrid on
+    h: stepsize for meshgrid, optional
+
+    Returns
+    -------
+    xx, yy : ndarray
+    """
+    x_min, x_max = x.min() - 1, x.max() + 1
+    y_min, y_max = y.min() - 1, y.max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                         np.arange(y_min, y_max, h))
+    return xx, yy
+
+def plot_contours(ax, clf, xx, yy, **params):
+    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+    out = ax.contourf(xx, yy, Z, **params)
+    return out
+def showComparisonForSVCBoundaries(feature1, feature2):
+    # feature_cols = list(data.columns[1:3])
+    feature_cols = [feature1, feature2]
+    X = data[feature_cols]
+    print "dagnabbit again"
+    print X
+    data['diagnosis'] = data['diagnosis'].map({'M':1, 'B':0})
+    y = data.diagnosis
+
+    # we create an instance of SVM and fit our data. We do not scale our
+    # data since we want to plot the support vectors
+    C = 1.0  # SVM regularization parameter
+    models = (svm.SVC(kernel='linear', C=C),
+              svm.LinearSVC(C=C),
+              svm.SVC(kernel='rbf', gamma=0.7, C=C),
+              svm.SVC(kernel='poly', degree=3, C=C))
+    models = (clf.fit(X, y) for clf in models)
+
+    # title for the plots
+    titles = ('SVC with linear kernel',
+              'LinearSVC (linear kernel)',
+              'SVC with RBF kernel',
+              'SVC with polynomial (degree 3) kernel')
+
+    # Set-up 2x2 grid for plotting.
+    fig, sub = plt.subplots(2, 2)
+    plt.subplots_adjust(wspace=0.4, hspace=0.4)
+
+    # # col0 is the column of the first feature we selected (ex: radius_mean)
+    # col0 = data.columns[1]
+    # # col1 is the column of the second feature we selected (ex: texture_mean)
+    # col1 = data.columns[2]
+
+    # X0 is the first feature we selected (ex: radius_mean)
+    # X1 is the second feature we selected (ex: texture_mean)
+    X0, X1 = data[feature1], data[feature2]
+    # print X0
+    # print X1
+    xx, yy = make_meshgrid(X0, X1)
+
+    for clf, title, ax in zip(models, titles, sub.flatten()):
+        plot_contours(ax, clf, xx, yy,
+                      cmap=plt.cm.coolwarm, alpha=0.8)
+        ax.scatter(X0, X1, c=y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
+        ax.set_xlim(xx.min(), xx.max())
+        ax.set_ylim(yy.min(), yy.max())
+        ax.set_xlabel(feature1)
+        ax.set_ylabel(feature2)
+        ax.set_xticks(())
+        ax.set_yticks(())
+        ax.set_title(title)
+
+    plt.show()
+#===================EVALUATE MODELS========================
 # Confusion matrix
 def showConfusionMatrix(clf, X_test, y_test):
     cm = confusion_matrix(y_test.values, clf.predict(X_test))
@@ -450,225 +529,79 @@ data = removeOutliers(raw_data)
 
 # data['diagnosis'] = data['diagnosis'].map({'M':1, 'B':0})
 
-data0 = data.drop(data.columns[0], axis=1, inplace=False)
-data1 = data0.drop(data0.columns[2:31], axis=1, inplace=False)
-#
-# # print data
-# # print data1
-#
-# # print data.shape
-#
-# # feature_cols = list(data.columns[1:3])
-# # target_col = data.columns[-0]
-# #
-# # # print( "Feature columns:\n{}".format(feature_cols))
-# # # print ("Target column: {}".format(target_col))
-# #
-# # X_all = data[feature_cols]
-# # y_all = data[target_col]
-#
-# # print X_all
-# # print y_all
-#
-# # num_train=400
+data1 = data.drop(data.columns[0], axis=1, inplace=False)
+
+print data
+print data1
+
+print data.shape
+
+# feature_cols = list(data.columns[1:3])
+# target_col = data.columns[-0]
+
+# print( "Feature columns:\n{}".format(feature_cols))
+# print ("Target column: {}".format(target_col))
+
+# X_all = data[feature_cols]
+# y_all = data[target_col]
+
+# print X_all
+# print y_all
+
+# num_train=400
 #
 # # Set the number of testing points
-# # num_test = X_all.shape[0] - num_train
+# num_test = X_all.shape[0] - num_train
 #
-# # from sklearn import cross_validation
-# #
-# # #  Shuffle and split the dataset into the number of training and testing points above
-# # rs = cross_validation.ShuffleSplit(569, n_iter=1,test_size=num_test, random_state=0)
-# # for train_index, test_index in rs:
-# #    # print("TRAIN:", train_index, "TEST:", test_index)
-# #     X_train = X_all.loc[train_index,]
-# #     X_test = X_all.loc[test_index,]
-# #     y_train = y_all.loc[train_index,]
-# #     y_test = y_all.loc[test_index,]
+# from sklearn import cross_validation
 #
-# # Split the dataset into test and train data
-# seed = 42
-# X_train, X_test, y_train, y_test = train_test_split(data1, data.diagnosis, test_size = 0.3, random_state=seed)
-# # # : Initialize the four models (before tuning)
-# clf_A = LogisticRegression()
-# clf_B = SVC()
-# clf_C = KNeighborsClassifier(n_neighbors=25,weights='uniform')
-# clf_D = AdaBoostClassifier(n_estimators=3)
-#
-#
-# # X_train_400 = X_train[:400]
-# # y_train_400 = y_train[:400]
-# # Untuned
-#
-#
-# # print "Classification results without model tuning"
-# print "Logistic Regression"
-# print train_predict(clf_A, X_train, y_train, X_test, y_test)
-# print "SVC"
-# print train_predict(clf_B, X_train, y_train, X_test, y_test)
-# # print "KNeighbors"
-# # print train_predict(clf_C, X_train, y_train, X_test, y_test)
-# # print "AdaBoost"
-# # print train_predict(clf_D, X_train, y_train, X_test, y_test)
-# #
-# # print "======================================="
-# #
-# # print "We will now evaluate the tuned models..."
-#
-# # evaluateSVCModel()
+# #  Shuffle and split the dataset into the number of training and testing points above
+# rs = cross_validation.ShuffleSplit(569, n_iter=1,test_size=num_test, random_state=0)
+# for train_index, test_index in rs:
+#    # print("TRAIN:", train_index, "TEST:", test_index)
+#     X_train = X_all.loc[train_index,]
+#     X_test = X_all.loc[test_index,]
+#     y_train = y_all.loc[train_index,]
+#     y_test = y_all.loc[test_index,]
 
-def make_meshgrid(x, y, h=.02):
-    """Create a mesh of points to plot in
-
-    Parameters
-    ----------
-    x: data to base x-axis meshgrid on
-    y: data to base y-axis meshgrid on
-    h: stepsize for meshgrid, optional
-
-    Returns
-    -------
-    xx, yy : ndarray
-    """
-    x_min, x_max = x.min() - 1, x.max() + 1
-    y_min, y_max = y.min() - 1, y.max() + 1
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
-                         np.arange(y_min, y_max, h))
-    return xx, yy
-
-def plot_contours(ax, clf, xx, yy, **params):
-    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
-    Z = Z.reshape(xx.shape)
-    out = ax.contourf(xx, yy, Z, **params)
-    return out
-
-# def prettyPicture(clf, X_test, y_test):
-    # print "==========================="
-    # print X_test
-    # print y_test
-    # x_min = 0.0
-    # x_max = 1.0
-    # y_min = 0.0
-    # y_max = 1.0
-    #
-    # # Plot the decision boundary. For that, we will assign a color to each
-    # # point in the mesh [x_min, m_max]x[y_min, y_max].
-    # h = .01  # step size in the mesh
-    # xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
-    # # print xx
-    # # print yy
-    # # print np.c_[xx.ravel(), yy.ravel()]
-    # Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
-    #
-    # # Put the result into a color plot
-    # Z = Z.reshape(xx.shape)
-    # plt.xlim(xx.min(), xx.max())
-    # plt.ylim(yy.min(), yy.max())
-    #
-    # for clf, title, ax in zip(models, titles, sub.flatten()):
-    #     plot_contours(ax, clf, xx, yy,
-    #                   cmap=plt.cm.coolwarm, alpha=0.8)
-    #     ax.scatter(X0, X1, c=y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
-    #     ax.set_xlim(xx.min(), xx.max())
-    #     ax.set_ylim(yy.min(), yy.max())
-    #     ax.set_xlabel('Sepal length')
-    #     ax.set_ylabel('Sepal width')
-    #     ax.set_xticks(())
-    #     ax.set_yticks(())
-    #     ax.set_title(title)
-    #
-    # plt.show()
-    #
-    # plt.pcolormesh(xx, yy, Z, cmap='RdBu')
-    #
-    # print "hi"
-    # print X_test[0][0]
-    # print X_test[0][1]
-    # print X_test[1][0]
-    # print X_test[1][1]
-    # # Plot also the test points
-    # grade_sig = [X_test[ii][0] for ii in range(0, len(X_test)) if y_test[ii] == 0]
-    # bumpy_sig = [X_test[ii][1] for ii in range(0, len(X_test)) if y_test[ii] == 0]
-    # grade_bkg = [X_test[ii][0] for ii in range(0, len(X_test)) if y_test[ii] == 1]
-    # bumpy_bkg = [X_test[ii][1] for ii in range(0, len(X_test)) if y_test[ii] == 1]
-    #
-    # plt.scatter(grade_sig, bumpy_sig, color="b", label="fast")
-    # plt.scatter(grade_bkg, bumpy_bkg, color="r", label="slow")
-    # plt.legend()
-    # plt.xlabel("bumpiness")
-    # plt.ylabel("grade")
-    # plt.show()
-
-# from class_vis import prettyPicture
-#
-
-print "new beginning"
-feature_cols = list(data.columns[1:3])
-X = data[feature_cols]
-data['diagnosis'] = data['diagnosis'].map({'M':1, 'B':0})
-y = data.diagnosis
-
-print X
-print y
-
-# we create an instance of SVM and fit out data. We do not scale our
-# data since we want to plot the support vectors
-C = 1.0  # SVM regularization parameter
-models = (svm.SVC(kernel='linear', C=C),
-          svm.LinearSVC(C=C),
-          svm.SVC(kernel='rbf', gamma=0.7, C=C),
-          svm.SVC(kernel='poly', degree=3, C=C))
-models = (clf.fit(X, y) for clf in models)
-
-# title for the plots
-titles = ('SVC with linear kernel',
-          'LinearSVC (linear kernel)',
-          'SVC with RBF kernel',
-          'SVC with polynomial (degree 3) kernel')
-
-# Set-up 2x2 grid for plotting.
-fig, sub = plt.subplots(2, 2)
-plt.subplots_adjust(wspace=0.4, hspace=0.4)
-
-print "hi again"
-
-col0 = data.columns[1]
-col1 = data.columns[2]
-
-X0, X1 = data[col0], data[col1]
-print X0
-print X1
-xx, yy = make_meshgrid(X0, X1)
-
-for clf, title, ax in zip(models, titles, sub.flatten()):
-    plot_contours(ax, clf, xx, yy,
-                  cmap=plt.cm.coolwarm, alpha=0.8)
-    ax.scatter(X0, X1, c=y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
-    ax.set_xlim(xx.min(), xx.max())
-    ax.set_ylim(yy.min(), yy.max())
-    ax.set_xlabel('Sepal length')
-    ax.set_ylabel('Sepal width')
-    ax.set_xticks(())
-    ax.set_yticks(())
-    ax.set_title(title)
-
-plt.show()
-
-# prettyPicture(clf_A, X_test, y_test)
-
-# radius_mean = X_train[:0]
-# texture_mean = X_train[:1]
-#
-#
-# plt.xlim(0.0, 1.0)
-# plt.ylim(0.0, 1.0)
-# plt.scatter(radius_mean, texture_mean, color = "b", label="malignant")
-# plt.legend()
-# plt.xlabel("texture_mean")
-# plt.ylabel("radius_mean")
-# plt.show()
+# Split the dataset into test and train data
+seed = 42
+X_train, X_test, y_train, y_test = train_test_split(data1, data.diagnosis, test_size = 0.3, random_state=seed)
+# # : Initialize the four models (before tuning)
+clf_A = LogisticRegression()
+clf_B = SVC()
+clf_C = KNeighborsClassifier(n_neighbors=25,weights='uniform')
+clf_D = AdaBoostClassifier(n_estimators=3)
 
 
+# X_train_400 = X_train[:400]
+# y_train_400 = y_train[:400]
+# Untuned
+
+
+# print "Classification results without model tuning"
+print "Logistic Regression"
+print train_predict(clf_A, X_train, y_train, X_test, y_test)
+print "SVC"
+print train_predict(clf_B, X_train, y_train, X_test, y_test)
+print "KNeighbors"
+print train_predict(clf_C, X_train, y_train, X_test, y_test)
+print "AdaBoost"
+print train_predict(clf_D, X_train, y_train, X_test, y_test)
+
+print "======================================="
+
+print "We will now evaluate the tuned models..."
+
+evaluateLogisticRegressionModel()
+
+
+# # Show SVC boundary comparison
+# feature1 = "radius_mean"
+# feature2 = "texture_mean"
+# showComparisonForSVCBoundaries(feature1, feature2)
+
+# # Visualize coefficients
 # clf_A1 = tuneLogisticRegression()
 # est = clf_A1.best_estimator_
 # visualize_coefficients(est, X_train.columns)
