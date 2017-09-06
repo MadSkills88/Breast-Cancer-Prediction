@@ -395,7 +395,7 @@ def showConfusionMatrix(clf, X_test, y_test):
     print(precision)
     # print(metrics.precision_score(y_test.values, clf.predict(X_test)))
 
-    
+
     print "Examining and adjusting classification threshold"
     print clf.predict(X_test)[0:10]
     print clf.predict_proba(X_test)[0:10]
@@ -600,14 +600,15 @@ print data.shape
 
 # showPCA(data1)
 
-# feature_cols = list(data.columns[1:3])
-# target_col = data.columns[-0]
-
-# print( "Feature columns:\n{}".format(feature_cols))
-# print ("Target column: {}".format(target_col))
-
-# X_all = data[feature_cols]
-# y_all = data[target_col]
+# # Use for final fitting clf with whole dataset
+# feature_cols_all = list(data.columns[1:31])
+# target_col_all = data.columns[-0]
+#
+# # print( "Feature columns:\n{}".format(feature_cols))
+# # print ("Target column: {}".format(target_col))
+#
+# X_all = data[feature_cols_all]
+# y_all = data[target_col_all]
 
 # print X_all
 # print y_all
@@ -681,4 +682,4 @@ evaluateLogisticRegressionModel()
 # from sklearn.model_selection import cross_val_score
 # print clf_A1.score(X_test, y_test)
 # print cross_val_score(clf_A1, X_all, y_all)
-# clf_A1.fit(data1,data.results)
+# clf_A1.fit(X_all,y_all)
