@@ -354,6 +354,64 @@ def showComparisonForSVCBoundaries(feature1, feature2):
 # Confusion matrix
 def showConfusionMatrix(clf, X_test, y_test):
     cm = confusion_matrix(y_test.values, clf.predict(X_test))
+    print "HELLO"
+    print cm
+    TP = cm[1, 1]
+    print TP
+    TN = cm[0, 0]
+    print TN
+    FP = cm[0, 1]
+    print FP
+    FN = cm[1, 0]
+    print FN
+    print "okey dokey"
+    # use float to perform true division, not integer division
+    print "accuracy score:"
+    accuracy_score = (TP + TN) / float(TP + TN + FP + FN)
+    print(accuracy_score)
+    # print(metrics.accuracy_score(y_test.values, clf.predict(X_test)))
+
+    print "classification error:"
+    classification_error = (FP + FN) / float(TP + TN + FP + FN)
+    print(classification_error)
+    # print(1 - metrics.accuracy_score(y_test.values, clf.predict(X_test)))
+
+    print "sensitivity"
+    sensitivity = TP / float(FN + TP)
+    print(sensitivity)
+    # print(metrics.recall_score(y_test.values, clf.predict(X_test)))
+
+    print "specificity"
+    specificity = TN / float(TN + FP)
+    print(specificity)
+
+    print "false_positive_rate"
+    false_positive_rate = FP / float(TN + FP)
+    print(false_positive_rate)
+    # print(1 - specificity)
+
+    print "precision"
+    precision = TP / float(TP + FP)
+    print(precision)
+    # print(metrics.precision_score(y_test.values, clf.predict(X_test)))
+
+    
+    print "Examining and adjusting classification threshold"
+    print clf.predict(X_test)[0:10]
+    print clf.predict_proba(X_test)[0:10]
+    print clf.predict_proba(X_test)[0:10, 1]
+    y_pred_prob = clf.predict_proba(X_test)[:, 1]
+    plt.rcParams['font.size'] = 12
+    plt.hist(y_pred_prob, bins=8)
+
+    # x-axis limit from 0 to 1
+    plt.xlim(0, 1)
+    plt.title('Histogram of predicted probabilities')
+    plt.xlabel('Predicted probability of malignancy')
+    plt.ylabel('Frequency')
+    plt.show()
+
+
     sns.heatmap(cm, annot=True, cmap='RdBu', xticklabels=['no', 'yes'], yticklabels=['no', 'yes'], linewidth=0.5)
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
@@ -540,7 +598,7 @@ print data1
 
 print data.shape
 
-showPCA(data1)
+# showPCA(data1)
 
 # feature_cols = list(data.columns[1:3])
 # target_col = data.columns[-0]
